@@ -26,23 +26,16 @@ st.write("---")
 # ==========================================
 @st.cache_data
 def load_clean_data():
-    # First, look for the file directly in the current working directory (ideal for GitHub/Streamlit Cloud)
-    csv_filename = 'madrid_10k_20191231.csv'
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    csv_path = os.path.join(current_directory, 'madrid_10k_20191231.csv')
     
-    if os.path.exists(csv_filename):
-        csv_path = csv_filename
-    else:
-        # Fallback for local testing environments if the terminal directory is misaligned
-        current_directory = os.path.dirname(os.path.abspath(__file__))
-        csv_path = os.path.join(current_directory, csv_filename)
-    
-    # Read the data safely
     df = pd.read_csv(csv_path)
     
-    # --- Keep all the rest of your cleaning logic below exactly the same ---
+    # Clean records missing critical milestone points
     df = df.dropna(subset=['total_seconds', '5km_seconds', 'age_category', 'sex'])
     df = df.drop_duplicates()
     
+    # Feature Engineering: Convert raw metric seconds to operational minutes
     df['Total_Minutes'] = df['total_seconds'] / 60
     df['Split_2.5K_Minutes'] = df['2.5km_seconds'] / 60
     df['Split_5K_Minutes'] = df['5km_seconds'] / 60
